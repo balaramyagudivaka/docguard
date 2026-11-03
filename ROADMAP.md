@@ -8,12 +8,12 @@ Build one milestone at a time. Each one ends with something that works, a test t
 
 ## Milestone 0: Run the starter (≈1 hour)
 
-- [ ] Install Python 3.12, Docker Desktop and VS Code
-- [ ] Clone this repo and open it in VS Code
-- [ ] In `backend/`: create a virtual environment and `pip install -r requirements.txt`
-- [ ] Run `uvicorn app.main:app --reload` and open http://localhost:8000/docs
-- [ ] Run `pytest` and see 1 test pass
-- [ ] Run `docker compose up -d` and check the database starts
+- [x] Install Python 3.12, Docker Desktop and VS Code
+- [x] Clone this repo and open it in VS Code
+- [x] In `backend/`: create a virtual environment and `pip install -r requirements.txt`
+- [x] Run `uvicorn app.main:app --reload` and open http://localhost:8000/docs
+- [x] Run `pytest` and see 1 test pass
+- [x] Run `docker compose up -d` and check the database starts
 
 **Learn:** what an API endpoint is, what a virtual environment is, what Docker does.
 **Done when:** the `/health` page shows `{"status": "ok"}` in your browser.
