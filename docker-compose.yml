@@ -1,0 +1,21 @@
+# Local database for development.
+# Start it with:   docker compose up -d
+# Stop it with:    docker compose down
+#
+# Uses PostgreSQL with the pgvector extension, which stores the "embeddings"
+# (number lists) we use to find documents related to a question.
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: docguard
+      POSTGRES_PASSWORD: docguard
+      POSTGRES_DB: docguard
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

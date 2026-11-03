@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Node (frontend, added later)
+node_modules/
+dist/
+
+# Uploaded files during local development
+uploads/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
