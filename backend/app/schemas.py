@@ -25,3 +25,18 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     created_at: datetime
+
+
+
+class LoginRequest(BaseModel):
+    """What the client sends to log in."""
+
+    email: EmailStr
+    password: str
+
+
+class Token(BaseModel):
+    """What the API returns after a successful login."""
+
+    access_token: str
+    token_type: str = "bearer"
