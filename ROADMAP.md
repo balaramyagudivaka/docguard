@@ -20,11 +20,11 @@ Build one milestone at a time. Each one ends with something that works, a test t
 
 ## Milestone 1: Users and login (≈3–4 days)
 
-- [ ] Connect to PostgreSQL with SQLAlchemy; create a `users` table
-- [ ] `POST /auth/register`: create a user, storing a **hashed** password (never plain text)
-- [ ] `POST /auth/login`: check the password and return a JWT access token
-- [ ] `GET /me`: return the logged-in user (requires the token)
-- [ ] Tests: register, login with right and wrong password, `/me` with and without a token
+- [x] Connect to PostgreSQL with SQLAlchemy; create a `users` table
+- [x] `POST /auth/register`: create a user, storing a **hashed** password (never plain text)
+- [x] `POST /auth/login`: check the password and return a JWT access token
+- [x] `GET /auth/me`: return the logged-in user (requires the token)
+- [x] Tests: register, login with right and wrong password, `/auth/me` with and without a token
 
 **Learn:** password hashing, JWT tokens, HTTP status codes (200, 201, 401, 409).
 **Done when:** all auth tests pass in GitHub Actions (green check).
