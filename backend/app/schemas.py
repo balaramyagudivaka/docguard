@@ -40,3 +40,33 @@ class Token(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
+
+
+
+class TeamCreate(BaseModel):
+    """What the client sends to create a team."""
+
+    name: str = Field(min_length=1, max_length=100)
+
+
+class TeamOut(BaseModel):
+    """A team as seen by one of its members."""
+
+    id: int
+    name: str
+    created_at: datetime
+    my_role: str
+
+
+class MemberOut(BaseModel):
+    """One person in a team."""
+
+    user_id: int
+    email: EmailStr
+    role: str
+
+
+class TeamDetail(TeamOut):
+    """A team plus its member list."""
+
+    members: list[MemberOut]

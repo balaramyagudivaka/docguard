@@ -33,3 +33,17 @@ def client(db):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+
+@pytest.fixture
+def make_user(client):
+    """Factory: make_user("a@x.com") registers + logs in, and returns auth headers."""
+
+    def _make(email: str) -> dict:
+        creds = {"email": email, "password": "correct-horse-battery"}
+        client.post("/auth/register", json=creds)
+        token = client.post("/auth/login", json=creds).json()["access_token"]
+        return {"Authorization": f"Bearer {token}"}
+
+    return _make

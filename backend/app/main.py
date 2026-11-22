@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app import auth, models  # noqa: F401  (importing models registers the tables)
+from app import auth, models, teams  # noqa: F401  (importing models registers the tables)
 from app.database import Base, engine
 
 
@@ -29,6 +29,7 @@ app = FastAPI(
 )
 
 app.include_router(auth.router)
+app.include_router(teams.router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
