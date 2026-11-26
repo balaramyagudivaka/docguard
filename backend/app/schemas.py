@@ -87,3 +87,34 @@ class RoleUpdate(BaseModel):
     """What the owner sends to change someone's role."""
 
     role: Role
+
+
+
+
+Visibility = Literal["team", "restricted"]
+
+
+class DocumentOut(BaseModel):
+    """A document's details, without its text."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    team_id: int
+    filename: str
+    size_bytes: int
+    visibility: Visibility
+    uploaded_by: int
+    created_at: datetime
+
+
+class DocumentDetail(DocumentOut):
+    """A document's details plus its full text."""
+
+    content: str
+
+
+class AccessGrant(BaseModel):
+    """Who to give access to a restricted document."""
+
+    email: EmailStr
