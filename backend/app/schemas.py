@@ -6,6 +6,7 @@ before your code even runs.
 """
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -70,3 +71,19 @@ class TeamDetail(TeamOut):
     """A team plus its member list."""
 
     members: list[MemberOut]
+    
+
+Role = Literal["owner", "member", "viewer"]  # the only allowed role values
+
+
+class MemberAdd(BaseModel):
+    """What the owner sends to add someone to a team."""
+
+    email: EmailStr
+    role: Role = "member"
+
+
+class RoleUpdate(BaseModel):
+    """What the owner sends to change someone's role."""
+
+    role: Role
