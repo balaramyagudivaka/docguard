@@ -16,8 +16,10 @@ from sqlalchemy import Select, or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
+from app.chunking import chunk_text
 from app.database import get_db
-from app.models import Document, DocumentAccess, User
+from app.embeddings import get_embedder
+from app.models import Chunk, Document, DocumentAccess, User
 from app.schemas import AccessGrant, DocumentDetail, DocumentOut, Visibility
 from app.teams import get_membership, require_membership
 
@@ -94,7 +96,15 @@ async def upload_document(
         size_bytes=len(data), visibility=visibility, content=text,
     )
     db.add(document)
-    db.commit()
+    db.flush()  # assigns document.id so the chunks can point to it
+
+    # Split into chunks and embed them, so the document can be searched by meaning.
+    pieces = chunk_text(text)
+    vectors = get_embedder().embed(pieces)
+    for index, (piece, vector) in enumerate(zip(pieces, vectors)):
+        db.add(Chunk(document_id=document.id, chunk_index=index, text=piece, embedding=vector))
+
+    db.commit()  # document and all its chunks are saved together
     db.refresh(document)
     return document
 

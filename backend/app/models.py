@@ -3,9 +3,11 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from pgvector.sqlalchemy import Vector
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+from app.embeddings import EMBEDDING_DIM
 
 
 def utc_now() -> datetime:
@@ -66,3 +68,15 @@ class DocumentAccess(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+
+
+class Chunk(Base):
+    """One small piece of a document, with its embedding (a list of numbers capturing its meaning)."""
+
+    __tablename__ = "chunks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
+    chunk_index: Mapped[int] = mapped_column(Integer)  # 0, 1, 2... position in the document
+    text: Mapped[str] = mapped_column(Text)
+    embedding = mapped_column(Vector(EMBEDDING_DIM))  # stored by pgvector

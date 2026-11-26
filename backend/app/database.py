@@ -2,7 +2,7 @@
 
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # Read the address from an environment variable, with the local Docker database as default.
@@ -16,6 +16,13 @@ SessionLocal = sessionmaker(bind=engine)      # a factory that makes sessions
 
 class Base(DeclarativeBase):
     """Every table class inherits from this, so SQLAlchemy can find them all."""
+
+
+def init_db() -> None:
+    """Turn on the pgvector extension, then create any tables that don't exist yet."""
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+    Base.metadata.create_all(bind=engine)
 
 
 def get_db():

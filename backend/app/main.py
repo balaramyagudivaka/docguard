@@ -10,14 +10,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app import auth, documents, models, teams  # noqa: F401  (importing models registers the tables)
-from app.database import Base, engine
+from app import auth, documents, models, search, teams  # noqa: F401  (importing models registers the tables)
+from app.database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Runs once when the server starts: create any tables that don't exist yet."""
-    Base.metadata.create_all(bind=engine)
+    """Runs once when the server starts: enable pgvector and create missing tables."""
+    init_db()
     yield
 
 
@@ -31,6 +31,8 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(teams.router)
 app.include_router(documents.router)
+app.include_router(search.router)
+
 
 @app.get("/health")
 def health() -> dict[str, str]:

@@ -1,15 +1,23 @@
-"""Shared test setup."""
+"""Shared test setup.
+
+Tests run against a separate PostgreSQL database, "docguard_test", so they use
+the same features as the real app (including pgvector) without touching your
+real data. Embeddings use the fast FakeEmbedder so no AI model is downloaded.
+"""
 
 import os
 
-# Use a small SQLite file for tests instead of PostgreSQL. Must run before the app is imported.
-os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+# Must run before the app is imported.
+os.environ["DATABASE_URL"] = os.getenv(
+    "TEST_DATABASE_URL", "postgresql+psycopg://docguard:docguard@localhost:5432/docguard_test"
+)
+os.environ["EMBEDDER"] = "fake"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app import models  # noqa: E402,F401
-from app.database import Base, SessionLocal, engine, get_db  # noqa: E402
+from app.database import Base, SessionLocal, engine, get_db, init_db  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -17,7 +25,7 @@ from app.main import app  # noqa: E402
 def db():
     """A fresh, empty database for every test."""
     Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    init_db()
     session = SessionLocal()
     yield session
     session.close()
@@ -33,7 +41,6 @@ def client(db):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
-
 
 
 @pytest.fixture

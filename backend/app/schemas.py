@@ -118,3 +118,20 @@ class AccessGrant(BaseModel):
     """Who to give access to a restricted document."""
 
     email: EmailStr
+
+
+class SearchRequest(BaseModel):
+    """A search over a team's documents."""
+
+    query: str = Field(min_length=1, max_length=500)
+    top_k: int = Field(default=5, ge=1, le=20)  # how many results to return
+
+
+class SearchResult(BaseModel):
+    """One matching chunk."""
+
+    document_id: int
+    filename: str
+    chunk_index: int
+    text: str
+    score: float  # 1.0 = identical meaning, 0 = unrelated
