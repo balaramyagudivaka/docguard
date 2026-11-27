@@ -10,3 +10,4 @@ pyjwt>=2.8
 python-multipart>=0.0.9
 pgvector>=0.3
 fastembed>=0.3
+openai>=1.40

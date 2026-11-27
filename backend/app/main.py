@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app import auth, documents, models, search, teams  # noqa: F401  (importing models registers the tables)
+from app import ask, auth, documents, models, search, teams  # noqa: F401  (importing models registers the tables)
 from app.database import init_db
 
 
@@ -32,6 +32,7 @@ app.include_router(auth.router)
 app.include_router(teams.router)
 app.include_router(documents.router)
 app.include_router(search.router)
+app.include_router(ask.router)
 
 
 @app.get("/health")

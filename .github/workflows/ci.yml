@@ -34,3 +34,23 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
       - run: pytest -q
+      - name: TEMP install Ollama and pull model
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (ollama serve > /tmp/ollama.log 2>&1 &)
+          sleep 5
+          ollama pull qwen3.5:4b
+          ollama list
+      - name: TEMP real LLM answer through DocGuard code
+        run: |
+          python - <<'PY'
+          from app.llm import get_llm
+          from app.ask import SYSTEM_PROMPT, build_prompt
+          from app.schemas import SearchResult
+          src = [SearchResult(document_id=1, filename="space.txt", chunk_index=0,
+                 text="The rocket launch put a new satellite into orbit around Earth.", score=0.7)]
+          llm = get_llm()
+          print("MODEL", llm.model)
+          print("ANSWER1:", llm.complete(SYSTEM_PROMPT, build_prompt("What did the rocket launch do?", src)))
+          print("ANSWER2:", llm.complete(SYSTEM_PROMPT, build_prompt("What is the capital of France?", src)))
+          PY
