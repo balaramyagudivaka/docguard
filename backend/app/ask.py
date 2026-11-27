@@ -57,5 +57,10 @@ def ask(
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE,
                             detail="The answer service is unavailable. Is Ollama running?")
 
-    citations = [Citation(number=i, **s.model_dump()) for i, s in enumerate(sources, start=1)]
+    # Return only the sources the answer actually cites, e.g. "[1]" appears in the text.
+    citations = [
+        Citation(number=i, **s.model_dump())
+        for i, s in enumerate(sources, start=1)
+        if f"[{i}]" in answer
+    ]
     return AskResponse(answer=answer, citations=citations)

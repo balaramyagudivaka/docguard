@@ -102,3 +102,29 @@ def test_uploader_gets_secret_in_answer(client, team):
     response = ask(client, team, "bob", "What is the vault password?")
     assert "ELEPHANT 42" in response.json()["answer"]
     assert response.json()["citations"][0]["filename"] == "vault.txt"
+
+
+
+def test_only_cited_sources_are_returned(client, team):
+    class OneSourceLLM:
+        def complete(self, system, user):
+            return "A satellite went into orbit [1]."
+
+    upload(client, team, "bob", "The rocket launch put a satellite into orbit.", name="space.txt")
+    upload(client, team, "bob", "Our cat sleeps in the sun.", name="cats.txt")
+    app.dependency_overrides[get_llm] = lambda: OneSourceLLM()
+
+    citations = ask(client, team, "erin", "What did the rocket do?").json()["citations"]
+    assert [c["number"] for c in citations] == [1]  # cats.txt was retrieved but not cited
+
+
+def test_not_found_answer_has_no_citations(client, team):
+    class NothingFoundLLM:
+        def complete(self, system, user):
+            return NOT_FOUND_ANSWER
+
+    upload(client, team, "bob", "Our cat sleeps in the sun.", name="cats.txt")
+    app.dependency_overrides[get_llm] = lambda: NothingFoundLLM()
+
+    response = ask(client, team, "erin", "What is the capital of France?").json()
+    assert response == {"answer": NOT_FOUND_ANSWER, "citations": []}
