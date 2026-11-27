@@ -81,9 +81,11 @@ def test_canary_never_reaches_unauthorized_member(client, team):
     upload(client, team, "bob", "Lunch menu: pasta and salad.", name="lunch.txt")
     upload(client, team, "bob", SECRET, name="vault.txt", visibility="restricted")
 
+    # Erin even types part of the secret. The fake LLM repeats its whole prompt (including
+    # her question), so we check for "ELEPHANT 42", which only the restricted file contains.
     response = ask(client, team, "erin", "What is the PURPLE ELEPHANT vault password?", top_k=10)
     assert response.status_code == 200
-    assert "PURPLE ELEPHANT" not in response.text  # not in the answer, not in any citation
+    assert "ELEPHANT 42" not in response.text  # not in the answer, not in any citation
     assert all(c["filename"] != "vault.txt" for c in response.json()["citations"])
 
 
@@ -91,12 +93,12 @@ def test_canary_never_reaches_viewer(client, team):
     upload(client, team, "bob", SECRET, name="vault.txt", visibility="restricted")
 
     response = ask(client, team, "carol", "What is the vault password?", top_k=10)
-    assert "PURPLE ELEPHANT" not in response.text
+    assert "ELEPHANT 42" not in response.text
 
 
 def test_uploader_gets_secret_in_answer(client, team):
     upload(client, team, "bob", SECRET, name="vault.txt", visibility="restricted")
 
     response = ask(client, team, "bob", "What is the vault password?")
-    assert "PURPLE ELEPHANT" in response.json()["answer"]
+    assert "ELEPHANT 42" in response.json()["answer"]
     assert response.json()["citations"][0]["filename"] == "vault.txt"
