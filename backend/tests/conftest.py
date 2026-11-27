@@ -2,7 +2,7 @@
 
 Tests run against a separate PostgreSQL database, "docguard_test", so they use
 the same features as the real app (including pgvector) without touching your
-real data. Embeddings use the fast FakeEmbedder so no AI model is downloaded.
+real data. Embeddings and answers use fast fakes, so no AI model is downloaded or called.
 """
 
 import os
@@ -12,6 +12,7 @@ os.environ["DATABASE_URL"] = os.getenv(
     "TEST_DATABASE_URL", "postgresql+psycopg://docguard:docguard@localhost:5432/docguard_test"
 )
 os.environ["EMBEDDER"] = "fake"
+os.environ["LLM_PROVIDER"] = "fake"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

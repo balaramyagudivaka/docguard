@@ -135,3 +135,26 @@ class SearchResult(BaseModel):
     chunk_index: int
     text: str
     score: float  # 1.0 = identical meaning, 0 = unrelated
+
+
+class AskRequest(BaseModel):
+    """A question about a team's documents."""
+
+    question: str = Field(min_length=1, max_length=1000)
+    top_k: int = Field(default=5, ge=1, le=10)  # how many chunks to give the LLM
+
+
+class Citation(BaseModel):
+    """A source the answer may refer to as [1], [2], ..."""
+
+    number: int
+    document_id: int
+    filename: str
+    chunk_index: int
+    text: str
+    score: float
+
+
+class AskResponse(BaseModel):
+    answer: str
+    citations: list[Citation]

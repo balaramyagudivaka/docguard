@@ -20,21 +20,18 @@ from app.teams import require_membership
 router = APIRouter(tags=["search"])
 
 
-@router.post("/teams/{team_id}/search", response_model=list[SearchResult])
-def search(
-    team_id: int,
-    data: SearchRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> list[SearchResult]:
-    """Return the chunks most similar in meaning to the query, from documents you may see."""
-    membership = require_membership(db, team_id, current_user)
+def find_relevant_chunks(db: Session, team_id: int, user: User, query: str, top_k: int) -> list[SearchResult]:
+    """The chunks most similar in meaning to `query`, from documents this user may see.
+
+    Used by both /search and /ask, so the permission rule lives in exactly one place.
+    """
+    membership = require_membership(db, team_id, user)
 
     allowed_ids = visible_documents(
-        current_user.id, team_id, membership.role == "owner"
+        user.id, team_id, membership.role == "owner"
     ).with_only_columns(Document.id)
 
-    query_vector = get_embedder().embed([data.query])[0]
+    query_vector = get_embedder().embed([query])[0]
     distance = Chunk.embedding.cosine_distance(query_vector)  # 0 = same direction
 
     rows = db.execute(
@@ -42,7 +39,7 @@ def search(
         .join(Document, Document.id == Chunk.document_id)
         .where(Chunk.document_id.in_(allowed_ids))  # ⭐ permission filter inside the query
         .order_by(distance)
-        .limit(data.top_k)
+        .limit(top_k)
     ).all()
 
     return [
@@ -52,3 +49,14 @@ def search(
         )
         for chunk, filename, dist in rows
     ]
+
+
+@router.post("/teams/{team_id}/search", response_model=list[SearchResult])
+def search(
+    team_id: int,
+    data: SearchRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[SearchResult]:
+    """Return the chunks most similar in meaning to the query, from documents you may see."""
+    return find_relevant_chunks(db, team_id, current_user, data.query, data.top_k)
